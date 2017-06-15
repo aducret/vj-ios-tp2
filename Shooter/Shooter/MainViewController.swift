@@ -10,6 +10,15 @@ import UIKit
 import SpriteKit
 import GameplayKit
 
+public struct PhysicsCategory {
+    
+    static let Player: UInt32 = 1
+    static let Grass: UInt32 = 2
+    static let Wall: UInt32 = 4
+    static let Enemy: UInt32 = 8
+    static let Shot: UInt32 = 16
+}
+
 public class MainViewController: UIViewController {
     
     fileprivate var scene: MenuScene!
