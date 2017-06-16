@@ -12,10 +12,31 @@ import UIKit
 
 public class Player: SKSpriteNode {
     
-    private let playerSpeed = 40
+    public enum State {
+        case idle
+        case walk
+    }
+    
+    public var state: State = .idle {
+        didSet {
+            switch state {
+            case .idle:
+                setIdleAnimation()
+            case .walk:
+                setWalkAnimation()
+            }
+        }
+    }
+    
+    private let playerSpeed = 80
     private let brakeDistance: CGFloat = 4.0
     
     public func updateMovement(node: SKNode, byTimeDelta timeDelta: TimeInterval) {
+        if node.name! == "Enemy" {
+            shot(to: node.position)
+            return
+        }
+        
         let point = node.position
         let distanceLeft = sqrt(pow(position.x - point.x, 2) + pow(position.y - point.y, 2))
         
@@ -28,6 +49,53 @@ public class Player: SKSpriteNode {
             position = CGPoint(x: position.x + xOffset, y: position.y + yOffset)
             zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
         }
+    }
+    
+}
+
+// MARK: Private Methods
+fileprivate extension Player {
+    
+    fileprivate func setWalkAnimation() {
+        let animation = SKAction.animate(with: [SKTexture(imageNamed: "player_walk_1"), SKTexture(imageNamed: "player_walk_2"),
+                                                SKTexture(imageNamed: "player_walk_3"), SKTexture(imageNamed: "player_walk_4"),
+                                                SKTexture(imageNamed: "player_walk_5"), SKTexture(imageNamed: "player_walk_6"),
+                                                SKTexture(imageNamed: "player_walk_7"), SKTexture(imageNamed: "player_walk_8")], timePerFrame: 0.1, resize: false, restore: true)
+        let repetAnimation = SKAction.repeatForever(animation)
+        run(repetAnimation)
+    }
+    
+    fileprivate func setIdleAnimation() {
+        removeAllActions()
+    }
+    
+    fileprivate func shot(to point: CGPoint) {
+        let angle = atan2(point.y - position.y, point.x - position.x)
+        zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
+        
+        let texture = SKTexture(imageNamed: "shot")
+        let shot = SKSpriteNode(texture: texture, size: CGSize(width: 20, height: 35))
+        shot.physicsBody = SKPhysicsBody(rectangleOf: shot.frame.size)
+        shot.physicsBody?.categoryBitMask = PhysicsCategory.Shot
+        shot.physicsBody?.contactTestBitMask = PhysicsCategory.Wall | PhysicsCategory.Enemy
+        shot.physicsBody?.collisionBitMask = 0
+        shot.physicsBody?.mass = 0.001
+        shot.physicsBody?.affectedByGravity = false
+        shot.physicsBody?.isDynamic = true
+        shot.physicsBody?.usesPreciseCollisionDetection = true
+        shot.zPosition = 2
+        shot.position = position
+        shot.zRotation = zRotation
+        parent!.addChild(shot)
+        
+        
+        let offset = point - shot.position
+        let direction = offset.normalized()
+        let shootAmount = direction * 1000
+        let realDest = shootAmount + shot.position
+        
+        let move = SKAction.move(to: realDest, duration: 2.0)
+        shot.run(move)
     }
     
 }

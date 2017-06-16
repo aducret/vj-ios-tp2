@@ -20,6 +20,7 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
     public override func didMove(to view: SKView) {
         super.didMove(to: view)
         
+        configureWorld()
         updateNodes()
         addCamera()
     }
@@ -31,7 +32,7 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
             lastInterval = currentTime
         }
         
-        var delta = currentTime - lastInterval!
+        let delta = currentTime - lastInterval!
         
         if let nodeTouched = nodeTouched {
             player.updateMovement(node: nodeTouched, byTimeDelta: delta)
@@ -64,11 +65,55 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
                 }
             }
             self.nodeTouched = nodeTouched
+            player.state = .walk
         }
     }
     
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.nodeTouched = .none
+        nodeTouched = .none
+        player.state = .idle
+    }
+    
+    public func didBegin(_ contact: SKPhysicsContact) {
+        var firstBody: SKPhysicsBody
+        var secondBody: SKPhysicsBody
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        } else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
+        }
+        
+        if ((firstBody.categoryBitMask & PhysicsCategory.Enemy != 0) && (secondBody.categoryBitMask & PhysicsCategory.Shot != 0)) {
+            if let shot = secondBody.node {
+                shot.isHidden = true
+            }
+        }
+        
+        if ((firstBody.categoryBitMask & PhysicsCategory.Wall != 0) && (secondBody.categoryBitMask & PhysicsCategory.Shot != 0)) {
+            if let shot = secondBody.node {
+                shot.removeFromParent()
+            }
+        }
+    }
+    
+    public  func didEnd(_ contact: SKPhysicsContact) {
+        var firstBody: SKPhysicsBody
+        var secondBody: SKPhysicsBody
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        } else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
+        }
+        
+        if ((firstBody.categoryBitMask & PhysicsCategory.Enemy != 0) && (secondBody.categoryBitMask & PhysicsCategory.Shot != 0)) {
+            if let shot = secondBody.node {
+                shot.removeFromParent()
+            }
+        }
     }
     
 }
@@ -136,6 +181,11 @@ fileprivate extension MainScene {
                 $0.physicsBody?.affectedByGravity = false
                 $0.physicsBody?.usesPreciseCollisionDetection = true
         }
+    }
+    
+    fileprivate func configureWorld() {
+        physicsWorld.gravity = CGVector.zero
+        physicsWorld.contactDelegate = self
     }
     
 }
