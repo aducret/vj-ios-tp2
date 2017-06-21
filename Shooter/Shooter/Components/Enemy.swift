@@ -12,6 +12,16 @@ import UIKit
 
 public class Enemy: SKSpriteNode {
     
+    private var lifes = 3
     
+    public func shooted() {
+        if lifes > 0 {
+            lifes -= 1
+        }
+        
+        if lifes == 0 {
+            removeFromParent()
+        }
+    }
     
 }

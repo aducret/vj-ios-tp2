@@ -28,12 +28,28 @@ public class Player: SKSpriteNode {
         }
     }
     
+    public var shooting = false
+    
     private let playerSpeed = 80
     private let brakeDistance: CGFloat = 4.0
+    private var lifes = 3
+    
+    public func shooted() {
+        if lifes > 0 {
+            lifes -= 1
+        }
+        
+        if lifes == 0 {
+            removeFromParent()
+        }
+    }
     
     public func updateMovement(node: SKNode, byTimeDelta timeDelta: TimeInterval) {
         if node.name! == "Enemy" {
-            shot(to: node.position)
+            if !shooting {
+                shot(to: node.position)
+                shooting = true
+            }
             return
         }
         
@@ -84,7 +100,7 @@ fileprivate extension Player {
         shot.physicsBody?.isDynamic = true
         shot.physicsBody?.usesPreciseCollisionDetection = true
         shot.zPosition = 2
-        shot.position = position
+        shot.position = convert(children[0].position, to: parent!)
         shot.zRotation = zRotation
         parent!.addChild(shot)
         

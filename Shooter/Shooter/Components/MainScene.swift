@@ -51,7 +51,7 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
         if let touch = touches.first?.location(in: self) {
             for node in nodes(at: touch) {
                 if node.name == "Wall" {
-                    nodeTouched = .none
+                    nodeTouched = node
                     break
                 }
                 
@@ -95,6 +95,7 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
             if let shot = secondBody.node {
                 shot.removeFromParent()
             }
+            player.shooting = false
         }
     }
     
@@ -113,6 +114,17 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
             if let shot = secondBody.node {
                 shot.removeFromParent()
             }
+            if let enemy = firstBody.node as? Enemy {
+                enemy.shooted()
+            }
+            player.shooting = false
+        }
+        
+        if ((firstBody.categoryBitMask & PhysicsCategory.Player != 0) && (secondBody.categoryBitMask & PhysicsCategory.Shot != 0)) {
+            if let shot = secondBody.node {
+                shot.removeFromParent()
+            }
+            player.shooted()
         }
     }
     
