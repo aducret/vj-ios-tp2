@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4667176A1EFDA507003DBA91 /* AStar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466717691EFDA507003DBA91 /* AStar.swift */; };
+		4667176C1EFDA5FF003DBA91 /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4667176B1EFDA5FF003DBA91 /* Grid.swift */; };
+		4667176E1EFDA651003DBA91 /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4667176D1EFDA651003DBA91 /* Node.swift */; };
 		46E34E261EF2DBEC0055CA96 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E34E251EF2DBEC0055CA96 /* Player.swift */; };
 		46E34E281EF2E1910055CA96 /* Wall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E34E271EF2E1910055CA96 /* Wall.swift */; };
 		46E34E2A1EF2E1960055CA96 /* Grass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E34E291EF2E1960055CA96 /* Grass.swift */; };
@@ -29,6 +32,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		466717691EFDA507003DBA91 /* AStar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AStar.swift; sourceTree = "<group>"; };
+		4667176B1EFDA5FF003DBA91 /* Grid.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
+		4667176D1EFDA651003DBA91 /* Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		46E34E251EF2DBEC0055CA96 /* Player.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
 		46E34E271EF2E1910055CA96 /* Wall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wall.swift; sourceTree = "<group>"; };
 		46E34E291EF2E1960055CA96 /* Grass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Grass.swift; sourceTree = "<group>"; };
@@ -101,6 +107,9 @@
 			isa = PBXGroup;
 			children = (
 				46FA01081EE8AF7200576F53 /* Utils.swift */,
+				466717691EFDA507003DBA91 /* AStar.swift */,
+				4667176B1EFDA5FF003DBA91 /* Grid.swift */,
+				4667176D1EFDA651003DBA91 /* Node.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -226,11 +235,14 @@
 				46E34E2C1EF2E19D0055CA96 /* Enemy.swift in Sources */,
 				46E34E2A1EF2E1960055CA96 /* Grass.swift in Sources */,
 				46FA01151EE8AF7200576F53 /* IntExtension.swift in Sources */,
+				4667176A1EFDA507003DBA91 /* AStar.swift in Sources */,
 				46E34E281EF2E1910055CA96 /* Wall.swift in Sources */,
 				46E34E2E1EF48F330055CA96 /* CGPointExtension.swift in Sources */,
 				46FA01141EE8AF7200576F53 /* FloatingPointExtension.swift in Sources */,
 				46FA00F81EE8AAEA00576F53 /* MainViewController.swift in Sources */,
+				4667176E1EFDA651003DBA91 /* Node.swift in Sources */,
 				46FA01181EE8B17C00576F53 /* MenuScene.swift in Sources */,
+				4667176C1EFDA5FF003DBA91 /* Grid.swift in Sources */,
 				46FA011A1EE8B2A200576F53 /* MainScene.swift in Sources */,
 				46FA00F01EE8AAEA00576F53 /* AppDelegate.swift in Sources */,
 				46E34E261EF2DBEC0055CA96 /* Player.swift in Sources */,
