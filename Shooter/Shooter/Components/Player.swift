@@ -11,6 +11,8 @@ import SpriteKit
 import UIKit
 
 public class Player: SKSpriteNode {
+    public var nodeTouched: SKNode? = .none
+    private var path: [Node]? = .none
     
     public enum State {
         case idle
@@ -44,26 +46,46 @@ public class Player: SKSpriteNode {
         }
     }
     
-    public func updateMovement(node: SKNode, byTimeDelta timeDelta: TimeInterval) {
-        if node.name! == "Enemy" {
-            if !shooting {
-                shot(to: node.position)
-                shooting = true
+    public func updateMovement(byTimeDelta timeDelta: TimeInterval, scene: SKScene) {
+        if let node = nodeTouched {
+            if node.name! == "Enemy" {
+                if !shooting {
+                    shot(to: node.position)
+                    shooting = true
+                }
+                return
             }
-            return
         }
         
-        let point = node.position
-        let distanceLeft = sqrt(pow(position.x - point.x, 2) + pow(position.y - point.y, 2))
-        
-        if (distanceLeft > brakeDistance) {
-            let distanceToTravel = CGFloat(timeDelta) * CGFloat(playerSpeed)
-            let angle = atan2(point.y - position.y, point.x - position.x)
-            let yOffset = distanceToTravel * sin(angle)
-            let xOffset = distanceToTravel * cos(angle)
+        if let node = nodeTouched {
+            let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 25, collisionBitMask: physicsBody!.collisionBitMask)
             
-            position = CGPoint(x: position.x + xOffset, y: position.y + yOffset)
-            zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
+            let origin = grid.nodeFromWorldPoint(point: position).worldPosition
+            let target = grid.nodeFromWorldPoint(point: node.position).worldPosition
+            path = AStar.findPath(origin: origin, target: target, grid: grid)
+            nodeTouched = .none
+        }
+        
+        if let path = path {
+            if path.count > 0 {
+                let point = path[0].worldPosition
+                let distanceLeft = sqrt(pow(position.x - point.x, 2) + pow(position.y - point.y, 2))
+                
+                if (distanceLeft > brakeDistance) {
+                    let distanceToTravel = CGFloat(timeDelta) * CGFloat(playerSpeed)
+                    let angle = atan2(point.y - position.y, point.x - position.x)
+                    let yOffset = distanceToTravel * sin(angle)
+                    let xOffset = distanceToTravel * cos(angle)
+                    
+                    position = CGPoint(x: position.x + xOffset, y: position.y + yOffset)
+                    zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
+                }
+                
+                let aux = path[0].worldPosition - position
+                if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
+                    self.path!.remove(at: 0)
+                }
+            }
         }
     }
     

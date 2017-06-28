@@ -38,14 +38,35 @@ public class Grid {
         grid = createGrid(gridSizeX: gridSizeX, gridSizeY: gridSizeY, nodeDiameter: nodeDiameter, collisionBitMask: collisionBitMask, scene: scene)
     }
     
-    public func nodeFromWorldPoint(worldPosition: CGPoint) -> Node {
-        let percentX = min(max((worldPosition.x + width / 2.0) / width, 0), 1)
-        let percentY = min(max((worldPosition.y + height / 2.0) / height, 0), 1)
+    public func nodeFromWorldPoint(point: CGPoint) -> Node {
+        let flattened = grid.flatMap { $0 }
+        let node: Node? = flattened.first {
+            point.x >= ($0.worldPosition.x - nodeDiameter / 2) &&
+            point.x <= ($0.worldPosition.x + nodeDiameter / 2) &&
+            point.y >= ($0.worldPosition.y - nodeDiameter / 2) &&
+            point.y <= ($0.worldPosition.y + nodeDiameter / 2)
+        }
         
-        let x = Int(round(CGFloat(gridSizeX - 1) * percentX))
-        let y = Int(round(CGFloat(gridSizeY - 1) * percentY))
+        return node!
+    }
+    
+    public func getNeighbourds(node: Node) -> [Node] {
+        var neighbourds: [Node] = []
         
-        return grid[x][y]
+        for x in -1...1 {
+            for y in -1...1 {
+                if x == 0 && y == 0 {
+                    continue
+                }
+                
+                let checkX = node.gridX + x
+                let checkY = node.gridY + y
+                if checkX >= 0 && checkX < Int(gridSizeX) && checkY >= 0 && checkY < Int(gridSizeY) {
+                    neighbourds.append(grid[checkX][checkY])
+                }
+            }
+        }
+        return neighbourds
     }
     
 }
@@ -54,21 +75,21 @@ private func createGrid(gridSizeX: UInt, gridSizeY: UInt, nodeDiameter: CGFloat,
     let xTop = Int(gridSizeX)
     let yTop = Int(gridSizeY)
     let nodeRadius = nodeDiameter / 2.0
-    let repetedValue = Node(worldPosition: CGPoint(x: 0, y: 0))
+    let repetedValue = Node(worldPosition: CGPoint(x: 0, y: 0), gridX: 0, gridY: 0)
     var grid = [[Node]](repeating: [Node](repeating: repetedValue, count: xTop), count: yTop)
-    let worldBottomLeft = scene.children.filter { $0.name! == "WorldBottomLeft" }[0].position
+    let worldBottomLeft = scene.children.filter { $0.name ?? "" == "WorldBottomLeft" }[0].position
     
     for x in 0..<xTop {
         for y in 0..<yTop {
             let worldPoint = worldBottomLeft + CGPoint(x: 1, y: 0) * (CGFloat(x) * nodeDiameter + nodeRadius) + CGPoint(x: 0, y: 1) * (CGFloat(y) * nodeDiameter + nodeRadius)
             let walkable = scene.nodes(at: worldPoint).reduce(true) { result, node in
                 if let physicsBody = node.physicsBody {
-                    return physicsBody.collisionBitMask & collisionBitMask != 0 && result
+                    return physicsBody.categoryBitMask & collisionBitMask == 0 && result
                 } else {
-                    return true && result
+                    return result
                 }
             }
-            grid[x][y] = Node(worldPosition: worldPoint, walkable: walkable)
+            grid[x][y] = Node(worldPosition: worldPoint, walkable: walkable, gridX: x, gridY: y)
         }
     }
     

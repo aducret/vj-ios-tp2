@@ -88,7 +88,6 @@
 		46FA00EE1EE8AAEA00576F53 /* Shooter */ = {
 			isa = PBXGroup;
 			children = (
-				46FA011B1EE8B6EE00576F53 /* AStar */,
 				46FA01071EE8AF7200576F53 /* Utils */,
 				46FA010C1EE8AF7200576F53 /* Extensions */,
 				46FA01161EE8AF8E00576F53 /* Components */,
@@ -146,13 +145,6 @@
 				46E34E2B1EF2E19D0055CA96 /* Enemy.swift */,
 			);
 			path = Components;
-			sourceTree = "<group>";
-		};
-		46FA011B1EE8B6EE00576F53 /* AStar */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = AStar;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

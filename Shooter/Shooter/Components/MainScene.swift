@@ -14,7 +14,6 @@ import Foundation
 public class MainScene: SKScene, SKPhysicsContactDelegate {
     
     fileprivate var player: Player!
-    fileprivate var nodeTouched: SKNode? = .none
     fileprivate var lastInterval: TimeInterval? = .none
     
     public override func didMove(to view: SKView) {
@@ -34,9 +33,7 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
         
         let delta = currentTime - lastInterval!
         
-        if let nodeTouched = nodeTouched {
-            player.updateMovement(node: nodeTouched, byTimeDelta: delta)
-        }
+        player.updateMovement(byTimeDelta: delta, scene: self)
         
         lastInterval = currentTime
     }
@@ -64,15 +61,15 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
                     nodeTouched = node
                 }
             }
-            self.nodeTouched = nodeTouched
-            player.state = .walk
+            player.nodeTouched = nodeTouched
+//            player.state = .walk
         }
     }
     
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        nodeTouched = .none
-        player.state = .idle
-    }
+//    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        nodeTouched = .none
+//        player.state = .idle
+//    }
     
     public func didBegin(_ contact: SKPhysicsContact) {
         var firstBody: SKPhysicsBody
