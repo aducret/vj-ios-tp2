@@ -15,15 +15,25 @@ public class Enemy: Player, Seek {
     public var player: Player!
     
     fileprivate let enemySpeed = 40
-     var path: [Node]? = .none
+    var path: [Node]? = .none
     fileprivate let breakDistance: CGFloat = 100.0
     fileprivate var currentPlayerPosition =  CGPoint(x: 0, y: 0)
+    fileprivate var patrolTarget: CGPoint? = .none
+    fileprivate let wanderTime = 5
     
     public enum State {
         case patrolling
         case chasing
         case shotting
     }
+    
+//    fileprivate var timer: Timer!
+    
+//    public required init?(coder aDecoder: NSCoder) {
+//        super.init(coder: aDecoder)
+        
+//        timer = Timer.scheduledTimer(timeInterval: 5, target: self, selector: Selector(("changePatrolTarget")), userInfo: nil, repeats: true)
+//    }
     
     public var state: State = .patrolling
     
@@ -42,6 +52,31 @@ public class Enemy: Player, Seek {
 
 // Mark: - Private Methods
 fileprivate extension Enemy {
+    
+//    fileprivate func patrol(byTimeDelta timeDelta: TimeInterval) {
+//        if patrolTarget == nil {
+//            changePatrolTarget()
+//        }
+//        
+//        if let patrolTarget = patrolTarget {
+//            if case animationState = AnimationState.idle {
+//                animationState = .walk
+//            }
+//            
+//            seek(target: patrolTarget)
+//            
+//            let aux = patrolTarget - position
+//            if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
+//                animationState = .idle
+//                self.patrolTarget = .none
+//            }
+//        }
+//        
+//        let distanceToPlayer = sqrt(pow(position.x - player.position.x, 2) + pow(position.y - player.position.y, 2))
+//        if distanceToPlayer <= 400 {
+//            state = .chasing
+//        }
+//    }
     
     fileprivate func patrol(byTimeDelta timeDelta: TimeInterval) {
         guard let scene = scene else { return }
@@ -148,5 +183,18 @@ fileprivate extension Enemy {
         shot(to: player.position)
         state = .chasing
     }
+    
+//    @objc
+//    fileprivate func changePatrolTarget() {
+//        guard let scene = scene else {
+//            patrolTarget = .none
+//            return
+//        }
+//        
+//        let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 25, collisionBitMask: physicsBody!.collisionBitMask)
+//        let nodes = grid.grid.flatMap { $0 }.filter { $0.walkable }.filter { sqrt(pow($0.worldPosition.x - position.x, 2) + pow($0.worldPosition.y - position.y, 2)) <= 800 }
+//        let index = arc4random_uniform(UInt32(nodes.count))
+//        patrolTarget = nodes[Int(index)].worldPosition
+//    }
     
 }
