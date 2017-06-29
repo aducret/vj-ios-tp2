@@ -24,6 +24,9 @@ extension Seek where Self: SKNode {
         let curretVelocity = physicsBody.velocity
         let desiredVelocity = (target - position).normalizedVector() * 100
         let steering = desiredVelocity - curretVelocity
+        let angle = atan2(target.y - position.y, target.x - position.x)
+        zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
+        
         physicsBody.applyForce(steering)
     }
     

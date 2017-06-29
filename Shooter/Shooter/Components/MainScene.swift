@@ -126,6 +126,14 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
                 shot.removeFromParent()
             }
         }
+        
+        if ((firstBody.categoryBitMask & PhysicsCategory.Player != 0) && (secondBody.categoryBitMask & PhysicsCategory.Life != 0)) {
+            if let life = secondBody.node {
+                life.removeFromParent()
+            }
+            
+            player.lifes += 2
+        }
     }
     
     public  func didEnd(_ contact: SKPhysicsContact) {
@@ -218,6 +226,19 @@ fileprivate extension MainScene {
                 $0.physicsBody?.categoryBitMask = PhysicsCategory.Enemy
                 $0.physicsBody?.contactTestBitMask = PhysicsCategory.Shot
                 $0.physicsBody?.collisionBitMask = PhysicsCategory.Player | PhysicsCategory.Wall
+                $0.physicsBody?.mass = 5
+                $0.physicsBody?.affectedByGravity = false
+                $0.physicsBody?.usesPreciseCollisionDetection = true
+        }
+        
+        children
+            .filter { $0.name == "Life" }
+            .map { $0 as! SKSpriteNode }
+            .forEach {
+                $0.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 40, height: 40))
+                $0.physicsBody?.categoryBitMask = PhysicsCategory.Life
+                $0.physicsBody?.contactTestBitMask = PhysicsCategory.Player
+                $0.physicsBody?.collisionBitMask = 0
                 $0.physicsBody?.mass = 5
                 $0.physicsBody?.affectedByGravity = false
                 $0.physicsBody?.usesPreciseCollisionDetection = true

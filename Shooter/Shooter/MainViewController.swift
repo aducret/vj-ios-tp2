@@ -17,6 +17,7 @@ public struct PhysicsCategory {
     static let Wall: UInt32 = 4
     static let Enemy: UInt32 = 8
     static let Shot: UInt32 = 16
+    static let Life: UInt32 = 32
 }
 
 public class MainViewController: UIViewController {
@@ -38,9 +39,9 @@ public class MainViewController: UIViewController {
         skView.ignoresSiblingOrder = true
         
         // This is just for debug
-        skView.showsFPS = true
-        skView.showsNodeCount = true
-        skView.showsPhysics = true
+//        skView.showsFPS = true
+//        skView.showsNodeCount = true
+//        skView.showsPhysics = true
         
         scene = MenuScene(fileNamed: "MenuScene")
         scene.scaleMode = .resizeFill
