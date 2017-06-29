@@ -18,6 +18,7 @@ public struct PhysicsCategory {
     static let Enemy: UInt32 = 8
     static let Shot: UInt32 = 16
     static let Life: UInt32 = 32
+    static let Raycast: UInt32 = 64
 }
 
 public class MainViewController: UIViewController {

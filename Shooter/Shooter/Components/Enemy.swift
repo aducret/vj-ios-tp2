@@ -10,10 +10,9 @@ import Foundation
 import SpriteKit
 import UIKit
 
-public class Enemy: Player, Seek {
+public class Enemy: Player {
     
     public var player: Player!
-    
     fileprivate let enemySpeed = 40
     var path: [Node]? = .none
     fileprivate let breakDistance: CGFloat = 100.0
@@ -26,14 +25,6 @@ public class Enemy: Player, Seek {
         case chasing
         case shotting
     }
-    
-//    fileprivate var timer: Timer!
-//    
-//    public required init?(coder aDecoder: NSCoder) {
-//        super.init(coder: aDecoder)
-//        
-//        timer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(Enemy.changePatrolTarget), userInfo: nil, repeats: true)
-//    }
     
     public var state: State = .patrolling
     
@@ -52,31 +43,6 @@ public class Enemy: Player, Seek {
 
 // Mark: - Private Methods
 fileprivate extension Enemy {
-    
-//    fileprivate func patrol(byTimeDelta timeDelta: TimeInterval) {
-//        if patrolTarget == nil {
-//            changePatrolTarget()
-//        }
-//        
-//        if let patrolTarget = patrolTarget {
-//            if case animationState = AnimationState.idle {
-//                animationState = .walk
-//            }
-//            
-//            seek(target: patrolTarget)
-//            
-//            let aux = patrolTarget - position
-//            if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
-//                animationState = .idle
-//                self.patrolTarget = .none
-//            }
-//        }
-//        
-//        let distanceToPlayer = sqrt(pow(position.x - player.position.x, 2) + pow(position.y - player.position.y, 2))
-//        if distanceToPlayer <= 400 {
-//            state = .chasing
-//        }
-//    }
     
     fileprivate func patrol(byTimeDelta timeDelta: TimeInterval) {
         guard let scene = scene else { return }
@@ -169,10 +135,10 @@ fileprivate extension Enemy {
             state = .patrolling
         } else if distanceToPlayer <= 350 {
             if let bullet = bullet {
-                if bullet.parent == .none {
+                if bullet.parent == .none && isPlayerInSight() {
                     state = .shotting
                 }
-            } else {
+            } else if isPlayerInSight() {
                 state = .shotting
             }
         }
@@ -184,21 +150,33 @@ fileprivate extension Enemy {
         state = .chasing
     }
     
-//    @objc
-//    fileprivate func changePatrolTarget() {
-//        guard let scene = scene else {
-//            patrolTarget = .none
-//            return
-//        }
-//        
-//        let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 50, collisionBitMask: physicsBody!.collisionBitMask)
-//        let nodes = grid.grid.flatMap { $0 }.filter { $0.walkable }.filter {
-//            let a = sqrt(pow($0.worldPosition.x - position.x, 2) + pow($0.worldPosition.y - position.y, 2)) <= 125
-//            let b = sqrt(pow($0.worldPosition.x - position.x, 2) + pow($0.worldPosition.y - position.y, 2)) > 50
-//            return a && b
-//        }
-//        let index = arc4random_uniform(UInt32(nodes.count))
-//        patrolTarget = nodes[Int(index)].worldPosition
-//    }
+    fileprivate func isPlayerInSight() -> Bool {
+        guard let scene = scene else { return false }
+        
+        var playerDistance: CGFloat = 0.0
+        var nodeDistance: CGFloat = CGFloat.infinity
+        var isInSight = false
+        scene.physicsWorld.enumerateBodies(alongRayStart: position, end: player.position) { body, point, normal, stop in
+            if let node = body.node, node.name ?? "" == "Player" {
+                playerDistance = sqrt(pow(self.position.x - self.player.position.x, 2) + pow(self.position.y - self.player.position.y, 2))
+                isInSight = true
+            }
+            
+            if let node = body.node, node.name ?? "" == "Wall" {
+                let aux = sqrt(pow(self.position.x - node.position.x, 2) + pow(self.position.y - node.position.y, 2))
+                if nodeDistance > aux {
+                    nodeDistance = aux
+                }
+            }
+            
+            if playerDistance <= nodeDistance {
+                isInSight = true
+            } else {
+                isInSight = false
+            }
+        }
+        
+        return isInSight
+    }
     
 }

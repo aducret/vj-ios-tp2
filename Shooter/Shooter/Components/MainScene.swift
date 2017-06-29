@@ -47,7 +47,6 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
         }
         
         if player.parent == nil {
-            print("Loss!")
             let transition = SKTransition.reveal(with: .up, duration: 1.0)
             let nextScene = MenuScene(fileNamed: "MenuScene")
             nextScene!.scaleMode = .aspectFill
