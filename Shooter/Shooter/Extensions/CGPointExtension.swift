@@ -32,11 +32,18 @@ func / (point: CGPoint, scalar: CGFloat) -> CGPoint {
 #endif
 
 extension CGPoint {
-    func length() -> CGFloat {
+    func norma() -> CGFloat {
         return sqrt(x*x + y*y)
     }
     
     func normalized() -> CGPoint {
-        return self / length()
+        return self / norma()
     }
+    
+    func normalizedVector() -> CGVector {
+        let length = norma()
+        return CGVector(dx: self.x / length, dy: self.y / length)
+    }
+    
 }
+

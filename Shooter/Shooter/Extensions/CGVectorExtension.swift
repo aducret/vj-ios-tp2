@@ -9,6 +9,22 @@
 import SpriteKit
 import Foundation
 
+func + (left: CGVector, right: CGVector) -> CGVector {
+    return CGVector(dx: left.dx + right.dx, dy: left.dy + right.dy)
+}
+
+func - (left: CGVector, right: CGVector) -> CGVector {
+    return CGVector(dx: left.dx - right.dx, dy: left.dy - right.dy)
+}
+
+func * (point: CGVector, scalar: CGFloat) -> CGVector {
+    return CGVector(dx: point.dx * scalar, dy: point.dy * scalar)
+}
+
+func / (point: CGVector, scalar: CGFloat) -> CGVector {
+    return CGVector(dx: point.dx / scalar, dy: point.dy / scalar)
+}
+
 public extension CGVector {
     
     public func dot(_ vector: CGVector) -> CGFloat {
@@ -38,3 +54,4 @@ public extension CGVector {
     }
     
 }
+

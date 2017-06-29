@@ -10,7 +10,7 @@ import Foundation
 import SpriteKit
 import UIKit
 
-public class Enemy: Player {
+public class Enemy: Player, Seek {
     
     public var player: Player!
     
