@@ -27,13 +27,13 @@ public class Enemy: Player, Seek {
         case shotting
     }
     
-    fileprivate var timer: Timer!
-    
-    public required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        
-        timer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(Enemy.changePatrolTarget), userInfo: nil, repeats: true)
-    }
+//    fileprivate var timer: Timer!
+//    
+//    public required init?(coder aDecoder: NSCoder) {
+//        super.init(coder: aDecoder)
+//        
+//        timer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(Enemy.changePatrolTarget), userInfo: nil, repeats: true)
+//    }
     
     public var state: State = .patrolling
     
@@ -53,68 +53,22 @@ public class Enemy: Player, Seek {
 // Mark: - Private Methods
 fileprivate extension Enemy {
     
-    fileprivate func patrol(byTimeDelta timeDelta: TimeInterval) {
-        if patrolTarget == nil {
-            changePatrolTarget()
-        }
-        
-        if let patrolTarget = patrolTarget {
-            if case animationState = AnimationState.idle {
-                animationState = .walk
-            }
-            
-            seek(target: patrolTarget)
-            
-            let aux = patrolTarget - position
-            if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
-                animationState = .idle
-                self.patrolTarget = .none
-            }
-        }
-        
-        let distanceToPlayer = sqrt(pow(position.x - player.position.x, 2) + pow(position.y - player.position.y, 2))
-        if distanceToPlayer <= 400 {
-            state = .chasing
-        }
-    }
-    
 //    fileprivate func patrol(byTimeDelta timeDelta: TimeInterval) {
-//        guard let scene = scene else { return }
-//        
-//        if path == nil || path!.count == 0 {
-//            let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 25, collisionBitMask: physicsBody!.collisionBitMask)
-//            let nodes = grid.grid.flatMap { $0 }.filter { $0.walkable }
-//            let index = arc4random_uniform(UInt32(nodes.count))
-//            let origin = grid.nodeFromWorldPoint(point: position).worldPosition
-//            let target = nodes[Int(index)].worldPosition
-//            self.path = AStar.findPath(origin: origin, target: target, grid: grid)
+//        if patrolTarget == nil {
+//            changePatrolTarget()
 //        }
 //        
-//        if let path = path {
-//            if path.count > 0 {
-//                if case animationState = AnimationState.idle {
-//                    animationState = .walk
-//                }
-//                let point = path[0].worldPosition
-//                let distanceLeft = sqrt(pow(position.x - point.x, 2) + pow(position.y - point.y, 2))
-//                
-//                if (distanceLeft > brakeDistance) {
-//                    let distanceToTravel = CGFloat(timeDelta) * CGFloat(enemySpeed)
-//                    let angle = atan2(point.y - position.y, point.x - position.x)
-//                    let yOffset = distanceToTravel * sin(angle)
-//                    let xOffset = distanceToTravel * cos(angle)
-//                    
-//                    position = CGPoint(x: position.x + xOffset, y: position.y + yOffset)
-//                    zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
-//                }
-//                
-//                let aux = point - position
-//                if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
-//                    self.path!.remove(at: 0)
-//                    if self.path!.count == 0 {
-//                        animationState = .idle
-//                    }
-//                }
+//        if let patrolTarget = patrolTarget {
+//            if case animationState = AnimationState.idle {
+//                animationState = .walk
+//            }
+//            
+//            seek(target: patrolTarget)
+//            
+//            let aux = patrolTarget - position
+//            if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
+//                animationState = .idle
+//                self.patrolTarget = .none
 //            }
 //        }
 //        
@@ -123,6 +77,52 @@ fileprivate extension Enemy {
 //            state = .chasing
 //        }
 //    }
+    
+    fileprivate func patrol(byTimeDelta timeDelta: TimeInterval) {
+        guard let scene = scene else { return }
+        
+        if path == nil || path!.count == 0 {
+            let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 25, collisionBitMask: physicsBody!.collisionBitMask)
+            let nodes = grid.grid.flatMap { $0 }.filter { $0.walkable }
+            let index = arc4random_uniform(UInt32(nodes.count))
+            let origin = grid.nodeFromWorldPoint(point: position).worldPosition
+            let target = nodes[Int(index)].worldPosition
+            self.path = AStar.findPath(origin: origin, target: target, grid: grid)
+        }
+        
+        if let path = path {
+            if path.count > 0 {
+                if case animationState = AnimationState.idle {
+                    animationState = .walk
+                }
+                let point = path[0].worldPosition
+                let distanceLeft = sqrt(pow(position.x - point.x, 2) + pow(position.y - point.y, 2))
+                
+                if (distanceLeft > brakeDistance) {
+                    let distanceToTravel = CGFloat(timeDelta) * CGFloat(enemySpeed)
+                    let angle = atan2(point.y - position.y, point.x - position.x)
+                    let yOffset = distanceToTravel * sin(angle)
+                    let xOffset = distanceToTravel * cos(angle)
+                    
+                    position = CGPoint(x: position.x + xOffset, y: position.y + yOffset)
+                    zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
+                }
+                
+                let aux = point - position
+                if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
+                    self.path!.remove(at: 0)
+                    if self.path!.count == 0 {
+                        animationState = .idle
+                    }
+                }
+            }
+        }
+        
+        let distanceToPlayer = sqrt(pow(position.x - player.position.x, 2) + pow(position.y - player.position.y, 2))
+        if distanceToPlayer <= 400 {
+            state = .chasing
+        }
+    }
     
     fileprivate func chase(byTimeDelta timeDelta: TimeInterval) {
         guard let scene = scene else { return }
@@ -184,21 +184,21 @@ fileprivate extension Enemy {
         state = .chasing
     }
     
-    @objc
-    fileprivate func changePatrolTarget() {
-        guard let scene = scene else {
-            patrolTarget = .none
-            return
-        }
-        
-        let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 50, collisionBitMask: physicsBody!.collisionBitMask)
-        let nodes = grid.grid.flatMap { $0 }.filter { $0.walkable }.filter {
-            let a = sqrt(pow($0.worldPosition.x - position.x, 2) + pow($0.worldPosition.y - position.y, 2)) <= 125
-            let b = sqrt(pow($0.worldPosition.x - position.x, 2) + pow($0.worldPosition.y - position.y, 2)) > 50
-            return a && b
-        }
-        let index = arc4random_uniform(UInt32(nodes.count))
-        patrolTarget = nodes[Int(index)].worldPosition
-    }
+//    @objc
+//    fileprivate func changePatrolTarget() {
+//        guard let scene = scene else {
+//            patrolTarget = .none
+//            return
+//        }
+//        
+//        let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 50, collisionBitMask: physicsBody!.collisionBitMask)
+//        let nodes = grid.grid.flatMap { $0 }.filter { $0.walkable }.filter {
+//            let a = sqrt(pow($0.worldPosition.x - position.x, 2) + pow($0.worldPosition.y - position.y, 2)) <= 125
+//            let b = sqrt(pow($0.worldPosition.x - position.x, 2) + pow($0.worldPosition.y - position.y, 2)) > 50
+//            return a && b
+//        }
+//        let index = arc4random_uniform(UInt32(nodes.count))
+//        patrolTarget = nodes[Int(index)].worldPosition
+//    }
     
 }
