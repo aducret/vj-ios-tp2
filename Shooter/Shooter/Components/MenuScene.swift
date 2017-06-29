@@ -13,10 +13,19 @@ import Foundation
 
 public class MenuScene: SKScene, SKPhysicsContactDelegate {
     
+    public var stateText = ""
+    
     public override func didMove(to view: SKView) {
         super.didMove(to: view)
         
         initializeScene(view)
+        let stateLabel = children.first { $0.name ?? "" == "State"} as! SKLabelNode
+        if stateText == "" {
+            stateLabel.isHidden = true
+        } else {
+            stateLabel.isHidden = false
+            stateLabel.text = stateText
+        }
     }
     
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

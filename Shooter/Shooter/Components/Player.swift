@@ -34,7 +34,7 @@ public class Player: SKSpriteNode {
     
     private let playerSpeed = 80
     let brakeDistance: CGFloat = 5.0
-    private var lifes = 3
+    public var lifes = 3
     
     public func shooted() {
         if lifes > 0 {
