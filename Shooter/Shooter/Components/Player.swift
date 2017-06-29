@@ -11,17 +11,17 @@ import SpriteKit
 import UIKit
 
 public class Player: SKSpriteNode {
-    public var nodeTouched: SKNode? = .none
+    public var pointTouched: CGPoint? = .none
     private var path: [Node]? = .none
     
-    public enum State {
+    public enum AnimationState {
         case idle
         case walk
     }
     
-    public var state: State = .idle {
+    public var animationState: AnimationState = .idle {
         didSet {
-            switch state {
+            switch animationState {
             case .idle:
                 setIdleAnimation()
             case .walk:
@@ -30,10 +30,10 @@ public class Player: SKSpriteNode {
         }
     }
     
-    public var shooting = false
+    var bullet: SKSpriteNode? = .none
     
     private let playerSpeed = 80
-    private let brakeDistance: CGFloat = 4.0
+    let brakeDistance: CGFloat = 5.0
     private var lifes = 3
     
     public func shooted() {
@@ -46,28 +46,35 @@ public class Player: SKSpriteNode {
         }
     }
     
-    public func updateMovement(byTimeDelta timeDelta: TimeInterval, scene: SKScene) {
-        if let node = nodeTouched {
-            if node.name! == "Enemy" {
-                if !shooting {
-                    shot(to: node.position)
-                    shooting = true
+    public func updateMovement(byTimeDelta timeDelta: TimeInterval) {
+        if let point = pointTouched {
+            let enemy = scene!.nodes(at: point).first { $0.name ?? "" == "Enemy"}
+            if let enemy = enemy {
+                if let bullet = bullet {
+                    if bullet.parent == .none {
+                        shot(to: enemy.position)
+                    }
+                } else {
+                    shot(to: enemy.position)
                 }
                 return
             }
         }
         
-        if let node = nodeTouched {
-            let grid = Grid(scene: scene, width: 1800, height: 1800, nodeRadius: 25, collisionBitMask: physicsBody!.collisionBitMask)
+        if let point = pointTouched {
+            let grid = Grid(scene: scene!, width: 1800, height: 1800, nodeRadius: 25, collisionBitMask: physicsBody!.collisionBitMask)
             
             let origin = grid.nodeFromWorldPoint(point: position).worldPosition
-            let target = grid.nodeFromWorldPoint(point: node.position).worldPosition
+            let target = grid.nodeFromWorldPoint(point: point).worldPosition
             path = AStar.findPath(origin: origin, target: target, grid: grid)
-            nodeTouched = .none
+            pointTouched = .none
         }
         
         if let path = path {
             if path.count > 0 {
+                if case animationState = AnimationState.idle {
+                    animationState = .walk
+                }
                 let point = path[0].worldPosition
                 let distanceLeft = sqrt(pow(position.x - point.x, 2) + pow(position.y - point.y, 2))
                 
@@ -81,12 +88,45 @@ public class Player: SKSpriteNode {
                     zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
                 }
                 
-                let aux = path[0].worldPosition - position
+                let aux = point - position
                 if abs(aux.x) < brakeDistance && abs(aux.y) < brakeDistance {
                     self.path!.remove(at: 0)
+                    if self.path!.count == 0 {
+                        animationState = .idle
+                    }
                 }
             }
         }
+    }
+    
+    func shot(to point: CGPoint) {
+        let angle = atan2(point.y - position.y, point.x - position.x)
+        zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
+        
+        let texture = SKTexture(imageNamed: "shot")
+        let shot = SKSpriteNode(texture: texture, size: CGSize(width: 10, height: 18))
+        shot.physicsBody = SKPhysicsBody(rectangleOf: shot.frame.size)
+        shot.physicsBody?.categoryBitMask = PhysicsCategory.Shot
+        shot.physicsBody?.contactTestBitMask = PhysicsCategory.Wall | PhysicsCategory.Enemy
+        shot.physicsBody?.collisionBitMask = 0
+        shot.physicsBody?.mass = 5
+        shot.physicsBody?.affectedByGravity = false
+        shot.physicsBody?.isDynamic = true
+        shot.physicsBody?.usesPreciseCollisionDetection = true
+        shot.zPosition = 2
+        shot.position = convert(children[0].position, to: parent!)
+        shot.zRotation = zRotation
+        shot.name = "Shot" + name!
+        bullet = shot
+        parent!.addChild(shot)
+        
+        let offset = point - shot.position
+        let direction = offset.normalized()
+        let shootAmount = direction * 1000
+        let realDest = shootAmount + shot.position
+        
+        let move = SKAction.move(to: realDest, duration: 2.5)
+        shot.run(move)
     }
     
 }
@@ -105,35 +145,6 @@ fileprivate extension Player {
     
     fileprivate func setIdleAnimation() {
         removeAllActions()
-    }
-    
-    fileprivate func shot(to point: CGPoint) {
-        let angle = atan2(point.y - position.y, point.x - position.x)
-        zRotation = CGFloat(Double(angle) - 270.degreesToRadians)
-        
-        let texture = SKTexture(imageNamed: "shot")
-        let shot = SKSpriteNode(texture: texture, size: CGSize(width: 20, height: 35))
-        shot.physicsBody = SKPhysicsBody(rectangleOf: shot.frame.size)
-        shot.physicsBody?.categoryBitMask = PhysicsCategory.Shot
-        shot.physicsBody?.contactTestBitMask = PhysicsCategory.Wall | PhysicsCategory.Enemy
-        shot.physicsBody?.collisionBitMask = 0
-        shot.physicsBody?.mass = 0.001
-        shot.physicsBody?.affectedByGravity = false
-        shot.physicsBody?.isDynamic = true
-        shot.physicsBody?.usesPreciseCollisionDetection = true
-        shot.zPosition = 2
-        shot.position = convert(children[0].position, to: parent!)
-        shot.zRotation = zRotation
-        parent!.addChild(shot)
-        
-        
-        let offset = point - shot.position
-        let direction = offset.normalized()
-        let shootAmount = direction * 1000
-        let realDest = shootAmount + shot.position
-        
-        let move = SKAction.move(to: realDest, duration: 2.0)
-        shot.run(move)
     }
     
 }

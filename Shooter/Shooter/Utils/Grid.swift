@@ -17,7 +17,7 @@ public class Grid {
     private let width: CGFloat
     private let height: CGFloat
     private let nodeRadius: CGFloat
-    private let grid: [[Node]]
+    public let grid: [[Node]]
     private let collisionBitMask: UInt32
     
     private let nodeDiameter: CGFloat
@@ -41,10 +41,10 @@ public class Grid {
     public func nodeFromWorldPoint(point: CGPoint) -> Node {
         let flattened = grid.flatMap { $0 }
         let node: Node? = flattened.first {
-            point.x >= ($0.worldPosition.x - nodeDiameter / 2) &&
-            point.x <= ($0.worldPosition.x + nodeDiameter / 2) &&
-            point.y >= ($0.worldPosition.y - nodeDiameter / 2) &&
-            point.y <= ($0.worldPosition.y + nodeDiameter / 2)
+            point.x >= ($0.worldPosition.x - nodeRadius) &&
+            point.x <= ($0.worldPosition.x + nodeRadius) &&
+            point.y >= ($0.worldPosition.y - nodeRadius) &&
+            point.y <= ($0.worldPosition.y + nodeRadius)
         }
         
         return node!

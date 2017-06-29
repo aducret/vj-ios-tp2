@@ -15,6 +15,7 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
     
     fileprivate var player: Player!
     fileprivate var lastInterval: TimeInterval? = .none
+    fileprivate var enemies: [Enemy]!
     
     public override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -22,10 +23,23 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
         configureWorld()
         updateNodes()
         addCamera()
+        enemies = children.filter { $0.name ?? "" == "Enemy"}.map { $0 as! Enemy }
+        enemies.forEach { $0.player = player }
     }
     
     public override func update(_ currentTime: TimeInterval) {
         super.update(currentTime)
+        
+        let win = enemies.reduce(true) { $0 && $1.parent == nil }
+        if win {
+            print("WIN!")
+            return
+        }
+        
+        if player.parent == nil {
+            print("Loss!")
+            return
+        }
         
         if lastInterval == .none {
             lastInterval = currentTime
@@ -33,7 +47,10 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
         
         let delta = currentTime - lastInterval!
         
-        player.updateMovement(byTimeDelta: delta, scene: self)
+        player.updateMovement(byTimeDelta: delta)
+        enemies.forEach {
+            $0.updateMovement(byTimeDelta: delta)
+        }
         
         lastInterval = currentTime
     }
@@ -44,32 +61,23 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
     }
     
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        var nodeTouched: SKNode? = .none
         if let touch = touches.first?.location(in: self) {
             for node in nodes(at: touch) {
                 if node.name == "Wall" {
-                    nodeTouched = node
                     break
                 }
                 
                 if node.name == "Enemy" {
-                    nodeTouched = node
+                    player.pointTouched = touch
                     break
                 }
                 
                 if node.name == "Grass" {
-                    nodeTouched = node
+                    player.pointTouched = touch
                 }
             }
-            player.nodeTouched = nodeTouched
-//            player.state = .walk
         }
     }
-    
-//    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        nodeTouched = .none
-//        player.state = .idle
-//    }
     
     public func didBegin(_ contact: SKPhysicsContact) {
         var firstBody: SKPhysicsBody
@@ -88,11 +96,16 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
             }
         }
         
+        if ((firstBody.categoryBitMask & PhysicsCategory.Player != 0) && (secondBody.categoryBitMask & PhysicsCategory.Shot != 0)) {
+            if let shot = secondBody.node {
+                shot.isHidden = true
+            }
+        }
+        
         if ((firstBody.categoryBitMask & PhysicsCategory.Wall != 0) && (secondBody.categoryBitMask & PhysicsCategory.Shot != 0)) {
             if let shot = secondBody.node {
                 shot.removeFromParent()
             }
-            player.shooting = false
         }
     }
     
@@ -114,13 +127,13 @@ public class MainScene: SKScene, SKPhysicsContactDelegate {
             if let enemy = firstBody.node as? Enemy {
                 enemy.shooted()
             }
-            player.shooting = false
         }
         
         if ((firstBody.categoryBitMask & PhysicsCategory.Player != 0) && (secondBody.categoryBitMask & PhysicsCategory.Shot != 0)) {
             if let shot = secondBody.node {
                 shot.removeFromParent()
             }
+            
             player.shooted()
         }
     }
@@ -148,7 +161,8 @@ fileprivate extension MainScene {
             .filter { $0.name == "Player" }
             .map { $0 as! SKSpriteNode }
             .forEach {
-                $0.physicsBody = SKPhysicsBody(texture: $0.texture!, size: $0.frame.size)
+//                $0.physicsBody = SKPhysicsBody(texture: $0.texture!, size: $0.frame.size)
+                $0.physicsBody = SKPhysicsBody(rectangleOf: $0.texture!.size())
                 $0.physicsBody?.categoryBitMask = PhysicsCategory.Player
                 $0.physicsBody?.contactTestBitMask = PhysicsCategory.Shot
                 $0.physicsBody?.collisionBitMask = PhysicsCategory.Enemy | PhysicsCategory.Wall
@@ -182,7 +196,8 @@ fileprivate extension MainScene {
             .filter { $0.name == "Enemy" }
             .map { $0 as! SKSpriteNode }
             .forEach {
-                $0.physicsBody = SKPhysicsBody(texture: $0.texture!, size: $0.frame.size)
+//                $0.physicsBody = SKPhysicsBody(texture: $0.texture!, size: $0.frame.size)
+                $0.physicsBody = SKPhysicsBody(rectangleOf: $0.texture!.size())
                 $0.physicsBody?.categoryBitMask = PhysicsCategory.Enemy
                 $0.physicsBody?.contactTestBitMask = PhysicsCategory.Shot
                 $0.physicsBody?.collisionBitMask = PhysicsCategory.Player | PhysicsCategory.Wall
